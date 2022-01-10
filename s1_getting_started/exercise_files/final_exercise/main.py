@@ -2,9 +2,14 @@ import argparse
 import sys
 
 import torch
+import torch.nn.functional as F
+from torch import nn
+
+from torch import optim
 
 from data import mnist
 from model import MyAwesomeModel
+import model
 
 
 class TrainOREvaluate(object):
@@ -35,10 +40,30 @@ class TrainOREvaluate(object):
         print(args)
         
         # TODO: Implement training loop here
-        model = MyAwesomeModel()
-        train_set, _ = mnist()
+        my_model = MyAwesomeModel(784, 10, [512, 256, 128])
+        criterion = nn.NLLLoss()
+        optimizer = optim.Adam(my_model.parameters(), lr=0.001)
+        trainloader, testloader = mnist()
+        model.train(my_model, trainloader, testloader, criterion, optimizer, epochs=2)
+
+        checkpoint = {'input_size': 784,
+              'output_size': 10,
+              'hidden_layers': [each.out_features for each in my_model.hidden_layers],
+              'state_dict': my_model.state_dict()}
+
+        torch.save(checkpoint, 'checkpoint.pth')
+
         
     def evaluate(self):
+
+        def load_checkpoint(filepath):
+            checkpoint = torch.load(filepath)
+            my_model = MyAwesomeModel(checkpoint['input_size'],
+                                    checkpoint['output_size'],
+                                    checkpoint['hidden_layers'])
+            my_model.load_state_dict(checkpoint['state_dict'])
+            
+            return my_model
         print("Evaluating until hitting the ceiling")
         parser = argparse.ArgumentParser(description='Training arguments')
         parser.add_argument('load_model_from', default="")
@@ -47,8 +72,15 @@ class TrainOREvaluate(object):
         print(args)
         
         # TODO: Implement evaluation logic here
-        model = torch.load(args.load_model_from)
-        _, test_set = mnist()
+        my_model = load_checkpoint('checkpoint.pth')
+        _, testloader = mnist()
+        criterion = nn.NLLLoss()
+
+        test_loss, accuracy = model.validation(my_model, testloader, criterion)
+        print(f'test loss: {test_loss}, accuracy: {accuracy}')
+   
+
+
 
 if __name__ == '__main__':
     TrainOREvaluate()
