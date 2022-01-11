@@ -45,7 +45,7 @@ the problem here is configuration is not easy. Each time you want to run a new e
 python train.py --batch_size 256 --learning_rate 1e-4 --other_hp 12345
 ```
 
-This at least solves the problem with configurability. However, we again can end up with loosing experiments if we are not carefull.
+This at least solves the problem with configurability. However, we again can end up with loosing experiments if we are not careful.
 
 What we really want is some way to easy configure our experiments where the hyperparameters are systematically saved with the experiment. For this we turn our attention to [Hydra](https://hydra.cc/), a configuration tool from Facebook. Hydra operates on top of [OmegaConf](https://github.com/omry/omegaconf) which is a `yaml` based hierarchical configuration system.
 
@@ -103,7 +103,7 @@ Note that we provide an solution (in the `vae_solution` folder) that can help yo
 
    1. Try changing one parameter from the command-line
       ```bash
-      python vae_mnist.py seed=1234
+      python vae_mnist.py hyperparameters.seed=1234
       ```
 
    2. Try adding one parameter from the command-line
