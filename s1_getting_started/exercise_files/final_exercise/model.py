@@ -15,32 +15,73 @@ class MyAwesomeModel(nn.Module):
         '''
         super().__init__()
         # Input to a hidden layer
-        self.hidden_layers = nn.ModuleList([nn.Linear(input_size, hidden_layers[0])])
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+class MyAwesomeModel(nn.Module):
+    def __init__(self, hidden_size, output_size, drop_p=0.3):
+        ''' Builds a feedforward network with arbitrary hidden layers.
         
-        # Add a variable number of more hidden layers
-        layer_sizes = zip(hidden_layers[:-1], hidden_layers[1:])
-        self.hidden_layers.extend([nn.Linear(h1, h2) for h1, h2 in layer_sizes])
+            Arguments
+            ---------
+            input_size: integer, size of the input layer
+            output_size: integer, size of the output layer
+            hidden_layers: list of integers, the sizes of the hidden layers
         
-        self.output = nn.Linear(hidden_layers[-1], output_size)
+        '''
+        super().__init__()
+        # Input to a hidden layer
+        self.num_classes = output_size
         
-        self.dropout = nn.Dropout(p=drop_p)
+        self.arch = nn.Sequential(
+            nn.Conv2d(in_channels=1,
+                      out_channels=64, 
+                      kernel_size=3, 
+                      padding=1,
+                      stride=1),
+            # output dim (64, 28, 28)
+            nn.BatchNorm2d(64),
+            nn.MaxPool2d(kernel_size=2, 
+                         stride=2),
+            # output dim (64, 14, 14)
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels=64, 
+                      out_channels=128, 
+                      kernel_size=5, 
+                      padding=2),
+            nn.Dropout2d(p=drop_p),
+            # output dim (128, 14, 14)
+            nn.MaxPool2d(kernel_size=2,
+                         stride=2),
+            # output dim (128, 7, 7)
+            nn.ReLU(inplace=True)
+        )
         
+        # fully connected output layers
+        # [(W−K+2P)/S]+1
+        self.fc1_features = 128*7*7
+        self.fc1 = nn.Linear(in_features=self.fc1_features, 
+                             out_features=hidden_size)
+        self.fc2 = nn.Linear(in_features=hidden_size,
+                             out_features=self.num_classes)
+        
+
+
     def forward(self, x):
-        ''' Forward pass through the network, returns the output logits '''
-        
-        for each in self.hidden_layers:
-            x = F.relu(each(x))
-            x = self.dropout(x)
-        x = self.output(x)
-        
-        return F.log_softmax(x, dim=1)
+
+        x = self.arch(x)
+        x = x.view(-1, self.fc1_features)
+        x = F.relu(self.fc1(x))
+
+        return F.log_softmax(self.fc2(x), dim=1)
 
 def validation(model, testloader, criterion):
     accuracy = 0
     test_loss = 0
     for images, labels in testloader:
 
-        images = images.resize_(images.size()[0], 784)
+        # images = images.resize_(images.size()[0], 784)
 
         output = model.forward(images)
         test_loss += criterion(output, labels).item()
@@ -57,7 +98,7 @@ def validation(model, testloader, criterion):
 
 def train(model, trainloader, testloader, criterion, optimizer=None, epochs=5, print_every=40):
     if optimizer is None:
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+        optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     steps = 0
     running_loss = 0
     for e in range(epochs):
@@ -67,7 +108,7 @@ def train(model, trainloader, testloader, criterion, optimizer=None, epochs=5, p
             steps += 1
             
             # Flatten images into a 784 long vector
-            images.resize_(images.size()[0], 784)
+            # images.resize_(images.size()[0], 784)
             
             optimizer.zero_grad()
             

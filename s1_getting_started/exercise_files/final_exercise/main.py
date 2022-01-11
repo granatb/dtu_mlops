@@ -40,15 +40,14 @@ class TrainOREvaluate(object):
         print(args)
         
         # TODO: Implement training loop here
-        my_model = MyAwesomeModel(784, 10, [512, 256, 128])
+        my_model = MyAwesomeModel(500, 10)
         criterion = nn.NLLLoss()
-        optimizer = optim.Adam(my_model.parameters(), lr=0.001)
+        optimizer = optim.SGD(my_model.parameters(), lr=0.001)
         trainloader, testloader = mnist()
-        model.train(my_model, trainloader, testloader, criterion, optimizer, epochs=2)
+        model.train(my_model, trainloader, testloader, criterion, optimizer, epochs=5)
 
-        checkpoint = {'input_size': 784,
+        checkpoint = {'hidden_size': 500,
               'output_size': 10,
-              'hidden_layers': [each.out_features for each in my_model.hidden_layers],
               'state_dict': my_model.state_dict()}
 
         torch.save(checkpoint, 'checkpoint.pth')
@@ -58,9 +57,8 @@ class TrainOREvaluate(object):
 
         def load_checkpoint(filepath):
             checkpoint = torch.load(filepath)
-            my_model = MyAwesomeModel(checkpoint['input_size'],
-                                    checkpoint['output_size'],
-                                    checkpoint['hidden_layers'])
+            my_model = MyAwesomeModel(checkpoint['hidden_size'],
+                                    checkpoint['output_size'])
             my_model.load_state_dict(checkpoint['state_dict'])
             
             return my_model
