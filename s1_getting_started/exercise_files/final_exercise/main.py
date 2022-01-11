@@ -40,13 +40,13 @@ class TrainOREvaluate(object):
         print(args)
         
         # TODO: Implement training loop here
-        my_model = MyAwesomeModel(500, 10)
+        my_model = MyAwesomeModel(128, 10)
         criterion = nn.NLLLoss()
-        optimizer = optim.SGD(my_model.parameters(), lr=0.001)
+        optimizer = optim.Adam(my_model.parameters(), lr=0.001)
         trainloader, testloader = mnist()
         model.train(my_model, trainloader, testloader, criterion, optimizer, epochs=5)
 
-        checkpoint = {'hidden_size': 500,
+        checkpoint = {'hidden_size': 128,
               'output_size': 10,
               'state_dict': my_model.state_dict()}
 

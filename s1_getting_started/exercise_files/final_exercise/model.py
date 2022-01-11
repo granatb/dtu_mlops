@@ -36,31 +36,31 @@ class MyAwesomeModel(nn.Module):
         
         self.arch = nn.Sequential(
             nn.Conv2d(in_channels=1,
-                      out_channels=64, 
+                      out_channels=16, 
                       kernel_size=3, 
                       padding=1,
                       stride=1),
-            # output dim (64, 28, 28)
-            nn.BatchNorm2d(64),
+            # output dim (16, 28, 28)
+            nn.BatchNorm2d(16),
             nn.MaxPool2d(kernel_size=2, 
                          stride=2),
-            # output dim (64, 14, 14)
+            # output dim (16, 14, 14)
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels=64, 
-                      out_channels=128, 
+            nn.Conv2d(in_channels=16, 
+                      out_channels=8, 
                       kernel_size=5, 
                       padding=2),
             nn.Dropout2d(p=drop_p),
-            # output dim (128, 14, 14)
+            # output dim (8, 14, 14)
             nn.MaxPool2d(kernel_size=2,
                          stride=2),
-            # output dim (128, 7, 7)
+            # output dim (8, 7, 7)
             nn.ReLU(inplace=True)
         )
         
         # fully connected output layers
         # [(W−K+2P)/S]+1
-        self.fc1_features = 128*7*7
+        self.fc1_features = 8*7*7
         self.fc1 = nn.Linear(in_features=self.fc1_features, 
                              out_features=hidden_size)
         self.fc2 = nn.Linear(in_features=hidden_size,
