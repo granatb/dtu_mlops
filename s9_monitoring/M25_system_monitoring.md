@@ -1,11 +1,11 @@
 ---
 layout: default
-title: M23 - Cloud deployment
-parent: S8 - Deployment
-nav_order: 2
+title: M25 - System monitoring
+parent: S9 - Monitoring
+nav_order: 1
 ---
 
-# Cloud deployment
+# System monitoring
 {: .no_toc }
 
 <details open markdown="block">
